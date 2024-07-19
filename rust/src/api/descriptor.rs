@@ -4,8 +4,7 @@ use crate::api::types::{KeychainKind, Network};
 use crate::frb_generated::RustOpaque;
 use bdk::bitcoin::bip32::Fingerprint;
 use bdk::bitcoin::key::Secp256k1;
-pub use bdk::descriptor::{ExtendedDescriptor, IntoWalletDescriptor};
-pub use bdk::keys;
+pub use bdk::descriptor::IntoWalletDescriptor;
 use bdk::template::{
     Bip44, Bip44Public, Bip49, Bip49Public, Bip84, Bip84Public, Bip86, Bip86Public,
     DescriptorTemplate,
@@ -14,8 +13,8 @@ use std::str::FromStr;
 
 #[derive(Debug)]
 pub struct BdkDescriptor {
-    pub extended_descriptor: RustOpaque<ExtendedDescriptor>,
-    pub key_map: RustOpaque<keys::KeyMap>,
+    pub extended_descriptor: RustOpaque<bdk::descriptor::ExtendedDescriptor>,
+    pub key_map: RustOpaque<bdk::keys::KeyMap>,
 }
 
 impl BdkDescriptor {
@@ -36,7 +35,7 @@ impl BdkDescriptor {
     ) -> Result<Self, BdkError> {
         let derivable_key = &(*secret_key.ptr);
         match derivable_key {
-            keys::DescriptorSecretKey::XPrv(descriptor_x_key) => {
+            bdk::keys::DescriptorSecretKey::XPrv(descriptor_x_key) => {
                 let derivable_key = descriptor_x_key.xkey;
                 let (extended_descriptor, key_map, _) =
                     Bip44(derivable_key, keychain_kind.into()).build(network.into())?;
@@ -45,10 +44,10 @@ impl BdkDescriptor {
                     key_map: RustOpaque::new(key_map),
                 })
             }
-            keys::DescriptorSecretKey::Single(_) => Err(BdkError::Generic(
+            bdk::keys::DescriptorSecretKey::Single(_) => Err(BdkError::Generic(
                 "Cannot derive from a single key".to_string(),
             )),
-            keys::DescriptorSecretKey::MultiXPrv(_) => Err(BdkError::Generic(
+            bdk::keys::DescriptorSecretKey::MultiXPrv(_) => Err(BdkError::Generic(
                 "Cannot derive from a multi key".to_string(),
             )),
         }
@@ -64,7 +63,7 @@ impl BdkDescriptor {
             .map_err(|e| BdkError::Generic(e.to_string()))?;
         let derivable_key = &(*public_key.ptr);
         match derivable_key {
-            keys::DescriptorPublicKey::XPub(descriptor_x_key) => {
+            bdk::keys::DescriptorPublicKey::XPub(descriptor_x_key) => {
                 let derivable_key = descriptor_x_key.xkey;
                 let (extended_descriptor, key_map, _) =
                     Bip44Public(derivable_key, fingerprint, keychain_kind.into())
@@ -75,10 +74,10 @@ impl BdkDescriptor {
                     key_map: RustOpaque::new(key_map),
                 })
             }
-            keys::DescriptorPublicKey::Single(_) => Err(BdkError::Generic(
+            bdk::keys::DescriptorPublicKey::Single(_) => Err(BdkError::Generic(
                 "Cannot derive from a single key".to_string(),
             )),
-            keys::DescriptorPublicKey::MultiXPub(_) => Err(BdkError::Generic(
+            bdk::keys::DescriptorPublicKey::MultiXPub(_) => Err(BdkError::Generic(
                 "Cannot derive from a multi key".to_string(),
             )),
         }
@@ -91,7 +90,7 @@ impl BdkDescriptor {
     ) -> Result<Self, BdkError> {
         let derivable_key = &(*secret_key.ptr);
         match derivable_key {
-            keys::DescriptorSecretKey::XPrv(descriptor_x_key) => {
+            bdk::keys::DescriptorSecretKey::XPrv(descriptor_x_key) => {
                 let derivable_key = descriptor_x_key.xkey;
                 let (extended_descriptor, key_map, _) =
                     Bip49(derivable_key, keychain_kind.into()).build(network.into())?;
@@ -100,10 +99,10 @@ impl BdkDescriptor {
                     key_map: RustOpaque::new(key_map),
                 })
             }
-            keys::DescriptorSecretKey::Single(_) => Err(BdkError::Generic(
+            bdk::keys::DescriptorSecretKey::Single(_) => Err(BdkError::Generic(
                 "Cannot derive from a single key".to_string(),
             )),
-            keys::DescriptorSecretKey::MultiXPrv(_) => Err(BdkError::Generic(
+            bdk::keys::DescriptorSecretKey::MultiXPrv(_) => Err(BdkError::Generic(
                 "Cannot derive from a multi key".to_string(),
             )),
         }
@@ -120,7 +119,7 @@ impl BdkDescriptor {
         let derivable_key = &(*public_key.ptr);
 
         match derivable_key {
-            keys::DescriptorPublicKey::XPub(descriptor_x_key) => {
+            bdk::keys::DescriptorPublicKey::XPub(descriptor_x_key) => {
                 let derivable_key = descriptor_x_key.xkey;
                 let (extended_descriptor, key_map, _) =
                     Bip49Public(derivable_key, fingerprint, keychain_kind.into())
@@ -131,10 +130,10 @@ impl BdkDescriptor {
                     key_map: RustOpaque::new(key_map),
                 })
             }
-            keys::DescriptorPublicKey::Single(_) => Err(BdkError::Generic(
+            bdk::keys::DescriptorPublicKey::Single(_) => Err(BdkError::Generic(
                 "Cannot derive from a single key".to_string(),
             )),
-            keys::DescriptorPublicKey::MultiXPub(_) => Err(BdkError::Generic(
+            bdk::keys::DescriptorPublicKey::MultiXPub(_) => Err(BdkError::Generic(
                 "Cannot derive from a multi key".to_string(),
             )),
         }
@@ -147,7 +146,7 @@ impl BdkDescriptor {
     ) -> Result<Self, BdkError> {
         let derivable_key = &(*secret_key.ptr);
         match derivable_key {
-            keys::DescriptorSecretKey::XPrv(descriptor_x_key) => {
+            bdk::keys::DescriptorSecretKey::XPrv(descriptor_x_key) => {
                 let derivable_key = descriptor_x_key.xkey;
                 let (extended_descriptor, key_map, _) =
                     Bip84(derivable_key, keychain_kind.into()).build(network.into())?;
@@ -156,10 +155,10 @@ impl BdkDescriptor {
                     key_map: RustOpaque::new(key_map),
                 })
             }
-            keys::DescriptorSecretKey::Single(_) => Err(BdkError::Generic(
+            bdk::keys::DescriptorSecretKey::Single(_) => Err(BdkError::Generic(
                 "Cannot derive from a single key".to_string(),
             )),
-            keys::DescriptorSecretKey::MultiXPrv(_) => Err(BdkError::Generic(
+            bdk::keys::DescriptorSecretKey::MultiXPrv(_) => Err(BdkError::Generic(
                 "Cannot derive from a multi key".to_string(),
             )),
         }
@@ -176,7 +175,7 @@ impl BdkDescriptor {
         let derivable_key = &(*public_key.ptr);
 
         match derivable_key {
-            keys::DescriptorPublicKey::XPub(descriptor_x_key) => {
+            bdk::keys::DescriptorPublicKey::XPub(descriptor_x_key) => {
                 let derivable_key = descriptor_x_key.xkey;
                 let (extended_descriptor, key_map, _) =
                     Bip84Public(derivable_key, fingerprint, keychain_kind.into())
@@ -187,10 +186,10 @@ impl BdkDescriptor {
                     key_map: RustOpaque::new(key_map),
                 })
             }
-            keys::DescriptorPublicKey::Single(_) => Err(BdkError::Generic(
+            bdk::keys::DescriptorPublicKey::Single(_) => Err(BdkError::Generic(
                 "Cannot derive from a single key".to_string(),
             )),
-            keys::DescriptorPublicKey::MultiXPub(_) => Err(BdkError::Generic(
+            bdk::keys::DescriptorPublicKey::MultiXPub(_) => Err(BdkError::Generic(
                 "Cannot derive from a multi key".to_string(),
             )),
         }
@@ -204,7 +203,7 @@ impl BdkDescriptor {
         let derivable_key = &(*secret_key.ptr);
 
         match derivable_key {
-            keys::DescriptorSecretKey::XPrv(descriptor_x_key) => {
+            bdk::keys::DescriptorSecretKey::XPrv(descriptor_x_key) => {
                 let derivable_key = descriptor_x_key.xkey;
                 let (extended_descriptor, key_map, _) =
                     Bip86(derivable_key, keychain_kind.into()).build(network.into())?;
@@ -213,10 +212,10 @@ impl BdkDescriptor {
                     key_map: RustOpaque::new(key_map),
                 })
             }
-            keys::DescriptorSecretKey::Single(_) => Err(BdkError::Generic(
+            bdk::keys::DescriptorSecretKey::Single(_) => Err(BdkError::Generic(
                 "Cannot derive from a single key".to_string(),
             )),
-            keys::DescriptorSecretKey::MultiXPrv(_) => Err(BdkError::Generic(
+            bdk::keys::DescriptorSecretKey::MultiXPrv(_) => Err(BdkError::Generic(
                 "Cannot derive from a multi key".to_string(),
             )),
         }
@@ -233,7 +232,7 @@ impl BdkDescriptor {
         let derivable_key = &(*public_key.ptr);
 
         match derivable_key {
-            keys::DescriptorPublicKey::XPub(descriptor_x_key) => {
+            bdk::keys::DescriptorPublicKey::XPub(descriptor_x_key) => {
                 let derivable_key = descriptor_x_key.xkey;
                 let (extended_descriptor, key_map, _) =
                     Bip86Public(derivable_key, fingerprint, keychain_kind.into())
@@ -244,10 +243,10 @@ impl BdkDescriptor {
                     key_map: RustOpaque::new(key_map),
                 })
             }
-            keys::DescriptorPublicKey::Single(_) => Err(BdkError::Generic(
+            bdk::keys::DescriptorPublicKey::Single(_) => Err(BdkError::Generic(
                 "Cannot derive from a single key".to_string(),
             )),
-            keys::DescriptorPublicKey::MultiXPub(_) => Err(BdkError::Generic(
+            bdk::keys::DescriptorPublicKey::MultiXPub(_) => Err(BdkError::Generic(
                 "Cannot derive from a multi key".to_string(),
             )),
         }

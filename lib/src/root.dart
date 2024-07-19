@@ -67,7 +67,7 @@ class Blockchain extends BdkBlockchain {
     final config = BlockchainConfig.esplora(
       config: EsploraConfig(
         baseUrl: 'https://mutinynet.ltbl.io/api',
-        stopGap: stopGap,
+        stopGap: BigInt.from(stopGap),
       ),
     );
     return create(config: config);
@@ -79,7 +79,7 @@ class Blockchain extends BdkBlockchain {
     final config = BlockchainConfig.esplora(
       config: EsploraConfig(
         baseUrl: 'https://testnet.ltbl.io/api',
-        stopGap: stopGap,
+        stopGap: BigInt.from(stopGap),
       ),
     );
     return create(config: config);
@@ -87,7 +87,7 @@ class Blockchain extends BdkBlockchain {
 
   ///Estimate the fee rate required to confirm a transaction in a given target of blocks
   @override
-  Future<FeeRate> estimateFee({required int target, hint}) async {
+  Future<FeeRate> estimateFee({required BigInt target, hint}) async {
     try {
       return super.estimateFee(target: target);
     } on BdkError catch (e) {

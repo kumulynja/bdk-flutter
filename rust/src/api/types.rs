@@ -33,7 +33,7 @@ impl From<bdk::bitcoin::OutPoint> for OutPoint {
     fn from(x: bdk::bitcoin::OutPoint) -> OutPoint {
         OutPoint {
             txid: x.txid.to_string(),
-            vout: x.clone().vout,
+            vout: x.vout,
         }
     }
 }
@@ -51,9 +51,7 @@ impl TryFrom<&TxIn> for bdk::bitcoin::TxIn {
         Ok(bdk::bitcoin::TxIn {
             previous_output: (&x.previous_output).try_into()?,
             script_sig: x.clone().script_sig.into(),
-            sequence: bdk::bitcoin::blockdata::transaction::Sequence::from_consensus(
-                x.sequence.clone(),
-            ),
+            sequence: bdk::bitcoin::blockdata::transaction::Sequence::from_consensus(x.sequence),
             witness: bdk::bitcoin::blockdata::witness::Witness::from_slice(
                 x.clone().witness.as_slice(),
             ),
@@ -303,11 +301,6 @@ pub enum Network {
     Bitcoin,
     ///Bitcoin’s signet
     Signet,
-}
-impl Default for Network {
-    fn default() -> Self {
-        Network::Testnet
-    }
 }
 impl From<Network> for bdk::bitcoin::Network {
     fn from(network: Network) -> Self {

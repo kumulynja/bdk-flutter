@@ -14,14 +14,12 @@ use crate::frb_generated::RustOpaque;
 use bdk::bitcoin::script::PushBytesBuf;
 use bdk::bitcoin::{Sequence, Txid};
 pub use bdk::blockchain::GetTx;
-pub use bdk::database::any::AnyDatabase;
 use bdk::database::ConfigurableDatabase;
-pub use std::sync::Mutex;
 use std::sync::MutexGuard;
 
 #[derive(Debug, Clone)]
 pub struct BdkWallet {
-    pub ptr: RustOpaque<Mutex<bdk::Wallet<AnyDatabase>>>,
+    pub ptr: RustOpaque<std::sync::Mutex<bdk::Wallet<bdk::database::any::AnyDatabase>>>,
 }
 impl BdkWallet {
     pub fn new(
@@ -30,7 +28,7 @@ impl BdkWallet {
         network: Network,
         database_config: DatabaseConfig,
     ) -> Result<Self, BdkError> {
-        let database = AnyDatabase::from_config(&database_config.into())?;
+        let database = bdk::database::any::AnyDatabase::from_config(&database_config.into())?;
         let descriptor: String = descriptor.as_string_private();
         let change_descriptor: Option<String> = change_descriptor.map(|d| d.as_string_private());
 
@@ -41,10 +39,10 @@ impl BdkWallet {
             database,
         )?;
         Ok(BdkWallet {
-            ptr: RustOpaque::new(Mutex::new(wallet)),
+            ptr: RustOpaque::new(std::sync::Mutex::new(wallet)),
         })
     }
-    pub(crate) fn get_wallet(&self) -> MutexGuard<bdk::Wallet<AnyDatabase>> {
+    pub(crate) fn get_wallet(&self) -> MutexGuard<bdk::Wallet<bdk::database::any::AnyDatabase>> {
         self.ptr.lock().expect("")
     }
 
@@ -240,10 +238,10 @@ pub fn finish_bump_fee_tx_builder(
     if enable_rbf {
         tx_builder.enable_rbf();
     }
-    return match tx_builder.finish() {
+    match tx_builder.finish() {
         Ok(e) => Ok((e.0.into(), TransactionDetails::try_from(e.1)?)),
         Err(e) => Err(e.into()),
-    };
+    }
 }
 
 pub fn tx_builder_finish(
@@ -273,16 +271,16 @@ pub fn tx_builder_finish(
     if !utxos.is_empty() {
         let bdk_utxos = utxos
             .iter()
-            .map(|e| bdk::bitcoin::OutPoint::try_from(e))
+            .map(bdk::bitcoin::OutPoint::try_from)
             .collect::<Result<Vec<bdk::bitcoin::OutPoint>, BdkError>>()?;
         tx_builder
             .add_utxos(bdk_utxos.as_slice())
-            .map_err(|e| <bdk::Error as Into<BdkError>>::into(e))?;
+            .map_err(<bdk::Error as Into<BdkError>>::into)?;
     }
     if !un_spendable.is_empty() {
         let bdk_unspendable = un_spendable
             .iter()
-            .map(|e| bdk::bitcoin::OutPoint::try_from(e))
+            .map(bdk::bitcoin::OutPoint::try_from)
             .collect::<Result<Vec<bdk::bitcoin::OutPoint>, BdkError>>()?;
         tx_builder.unspendable(bdk_unspendable);
     }
@@ -321,8 +319,8 @@ pub fn tx_builder_finish(
         tx_builder.add_data(&push_bytes);
     }
 
-    return match tx_builder.finish() {
+    match tx_builder.finish() {
         Ok(e) => Ok((e.0.into(), TransactionDetails::try_from(&e.1)?)),
         Err(e) => Err(e.into()),
-    };
+    }
 }

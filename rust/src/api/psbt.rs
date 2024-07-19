@@ -1,27 +1,26 @@
 use crate::api::error::BdkError;
 use crate::api::types::{BdkTransaction, FeeRate};
 use crate::frb_generated::RustOpaque;
-pub use bdk::bitcoin::psbt::PartiallySignedTransaction;
 use bdk::psbt::PsbtUtils;
 use std::ops::Deref;
 use std::str::FromStr;
-use std::sync::Mutex;
 
 #[derive(Debug, Clone)]
 pub struct BdkPsbt {
-    pub ptr: RustOpaque<Mutex<PartiallySignedTransaction>>,
+    pub ptr: RustOpaque<std::sync::Mutex<bdk::bitcoin::psbt::PartiallySignedTransaction>>,
 }
 
-impl From<PartiallySignedTransaction> for BdkPsbt {
-    fn from(value: PartiallySignedTransaction) -> Self {
+impl From<bdk::bitcoin::psbt::PartiallySignedTransaction> for BdkPsbt {
+    fn from(value: bdk::bitcoin::psbt::PartiallySignedTransaction) -> Self {
         Self {
-            ptr: RustOpaque::new(Mutex::new(value)),
+            ptr: RustOpaque::new(std::sync::Mutex::new(value)),
         }
     }
 }
 impl BdkPsbt {
     pub fn from_str(psbt_base64: String) -> Result<BdkPsbt, BdkError> {
-        let psbt: PartiallySignedTransaction = PartiallySignedTransaction::from_str(&psbt_base64)?;
+        let psbt: bdk::bitcoin::psbt::PartiallySignedTransaction =
+            bdk::bitcoin::psbt::PartiallySignedTransaction::from_str(&psbt_base64)?;
         Ok(psbt.into())
     }
     pub fn serialize(&self) -> String {
@@ -41,7 +40,7 @@ impl BdkPsbt {
         tx.try_into()
     }
 
-    /// Combines this PartiallySignedTransaction with other PSBT as described by BIP 174.
+    /// Combines this bdk::bitcoin::psbt::PartiallySignedTransaction with other PSBT as described by BIP 174.
     ///
     /// In accordance with BIP 174 this function is commutative i.e., `A.combine(B) == B.combine(A)`
     pub fn combine(ptr: BdkPsbt, other: BdkPsbt) -> Result<BdkPsbt, BdkError> {
@@ -58,7 +57,7 @@ impl BdkPsbt {
     }
 
     /// The transaction's fee rate. This value will only be accurate if calculated AFTER the
-    /// `PartiallySignedTransaction` is finalized and all witness/signature data is added to the
+    /// `bdk::bitcoin::psbt::PartiallySignedTransaction` is finalized and all witness/signature data is added to the
     /// transaction.
     /// If the PSBT is missing a TxOut for an input returns None.
     pub fn fee_rate(&self) -> Option<FeeRate> {

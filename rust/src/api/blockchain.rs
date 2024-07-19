@@ -7,18 +7,18 @@ use bdk::blockchain;
 use bdk::blockchain::esplora::EsploraBlockchainConfig;
 
 pub use bdk::blockchain::{
-    rpc, AnyBlockchain, AnyBlockchainConfig, Blockchain, ConfigurableBlockchain,
-    ElectrumBlockchainConfig, GetBlockHash, GetHeight,
+    rpc, AnyBlockchainConfig, Blockchain, ConfigurableBlockchain, ElectrumBlockchainConfig,
+    GetBlockHash, GetHeight,
 };
 use std::path::PathBuf;
 
 #[derive(Clone)]
 pub struct BdkBlockchain {
-    pub ptr: RustOpaque<AnyBlockchain>,
+    pub ptr: RustOpaque<bdk::blockchain::AnyBlockchain>,
 }
 
-impl From<AnyBlockchain> for BdkBlockchain {
-    fn from(value: AnyBlockchain) -> Self {
+impl From<bdk::blockchain::AnyBlockchain> for BdkBlockchain {
+    fn from(value: bdk::blockchain::AnyBlockchain) -> Self {
         Self {
             ptr: RustOpaque::new(value),
         }
@@ -56,10 +56,10 @@ impl BdkBlockchain {
                 })
             }
         };
-        let blockchain = AnyBlockchain::from_config(&any_blockchain_config)?;
+        let blockchain = bdk::blockchain::AnyBlockchain::from_config(&any_blockchain_config)?;
         Ok(blockchain.into())
     }
-    pub(crate) fn get_blockchain(&self) -> RustOpaque<AnyBlockchain> {
+    pub(crate) fn get_blockchain(&self) -> RustOpaque<bdk::blockchain::AnyBlockchain> {
         self.ptr.clone()
     }
 
